@@ -27,7 +27,6 @@ var adminController = {
 	plugins: {},
 	languages: {},
 	settings: {},
-	logger: {},
 	sounds: {},
 	users: require('./admin/users'),
 	uploads: require('./admin/uploads')
@@ -100,10 +99,6 @@ adminController.languages.get = function(req, res, next) {
 
 adminController.settings.get = function(req, res, next) {
 	res.render('admin/settings', {});
-};
-
-adminController.logger.get = function(req, res, next) {
-	res.render('admin/logger', {});
 };
 
 adminController.themes.get = function(req, res, next) {

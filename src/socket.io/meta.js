@@ -1,7 +1,6 @@
 var	meta = require('../meta'),
 	user = require('../user'),
 	topics = require('../topics'),
-	logger = require('../logger'),
 	plugins = require('../plugins'),
 
 	nconf = require('nconf'),

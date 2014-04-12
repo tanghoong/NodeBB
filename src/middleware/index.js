@@ -13,9 +13,15 @@ var templates = require('./../../public/src/templates'),
 	path = require('path'),
 	fs = require('fs'),
 	nconf = require('nconf'),
-	express = require('express'),
-	winston = require('winston');
+	winston = require('winston'),
 
+	express = require('express'),
+	bodyParser = require('body-parser'),
+	cookieParser = require('cookie-parser'),
+	session = require('express-session'),
+	favicon = require('static-favicon'),
+	compress = require('compression'),
+	csrf = require('csurf');
 
 var middleware = {};
 
@@ -165,57 +171,55 @@ function catch404(req, res, next) {
 module.exports = function(app, data) {
 	middleware = require('./middleware')(app);
 
-	app.configure(function() {
-		app.engine('tpl', templates.__express);
-		app.set('view engine', 'tpl');
-		app.set('views', nconf.get('views_dir'));
+	app.engine('tpl', templates.__express);
+	app.set('view engine', 'tpl');
+	app.set('views', nconf.get('views_dir'));
 
-		app.use(express.compress());
+	app.use(compress());
 
-		app.use(express.favicon(path.join(__dirname, '../../', 'public', meta.config['brand:favicon'] ? meta.config['brand:favicon'] : 'favicon.ico')));
-		app.use(nconf.get('relative_path') + '/apple-touch-icon', middleware.routeTouchIcon);
+	app.use(favicon(path.join(__dirname, '../../', 'public', meta.config['brand:favicon'] ? meta.config['brand:favicon'] : 'favicon.ico')));
+	app.use(nconf.get('relative_path') + '/apple-touch-icon', middleware.routeTouchIcon);
 
-		app.use(express.bodyParser());
-		app.use(express.cookieParser());
+	app.use(bodyParser());
+	app.use(cookieParser());
 
-		app.use(express.session({
-			store: db.sessionStore,
-			secret: nconf.get('secret'),
-			key: 'express.sid',
-			cookie: {
-				maxAge: 1000 * 60 * 60 * 24 * parseInt(meta.configs.loginDays || 14, 10)
-			}
-		}));
+	app.use(session({
+		store: db.sessionStore,
+		secret: nconf.get('secret'),
+		key: 'express.sid',
+		cookie: {
+			maxAge: 1000 * 60 * 60 * 24 * parseInt(meta.configs.loginDays || 14, 10)
+		}
+	}));
 
-		app.use(express.csrf()); // todo, make this a conditional middleware
+	app.use(csrf()); // todo, make this a conditional middleware
 
-		app.use(function (req, res, next) {
-			res.locals.csrf_token = req.session._csrf;
-			res.setHeader('X-Frame-Options', 'SAMEORIGIN');
-			res.setHeader('X-Powered-By', 'NodeBB');
-			next();
-		});
-
-		app.use(middleware.processRender);
-
-		auth.initialize(app);
-
-		routeCurrentTheme(app, data.currentThemeData);
-		routeThemeScreenshots(app, data.themesData);
-
-		plugins.getTemplates(function(err, pluginTemplates) {
-			compileTemplates(pluginTemplates);
-		});
-
-		app.use(nconf.get('relative_path'), app.router);
-
-		app.use(nconf.get('relative_path'), express.static(path.join(__dirname, '../../', 'public'), {
-			maxAge: app.enabled('cache') ? 5184000000 : 0
-		}));
-
-		app.use(catch404);
-		app.use(handleErrors);
+	app.use(function (req, res, next) {
+		res.locals.csrf_token = req.session._csrf;
+		res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+		res.setHeader('X-Powered-By', 'NodeBB');
+		next();
 	});
+
+	app.use(middleware.processRender);
+
+	auth.initialize(app);
+
+	routeCurrentTheme(app, data.currentThemeData);
+	routeThemeScreenshots(app, data.themesData);
+
+	plugins.getTemplates(function(err, pluginTemplates) {
+		compileTemplates(pluginTemplates);
+	});
+
+	app.use(nconf.get('relative_path'), app.router);
+
+	app.use(nconf.get('relative_path'), express.static(path.join(__dirname, '../../', 'public'), {
+		maxAge: app.enabled('cache') ? 5184000000 : 0
+	}));
+
+	app.use(catch404);
+	app.use(handleErrors);
 
 	return middleware;
 };

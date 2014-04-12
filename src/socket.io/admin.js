@@ -8,7 +8,6 @@ var	groups = require('../groups'),
 	topics = require('../topics'),
 	categories = require('../categories'),
 	CategoryTools = require('../categoryTools'),
-	logger = require('../logger'),
 	events = require('../events'),
 	db = require('../database'),
 	async = require('async'),
@@ -345,8 +344,6 @@ SocketAdmin.config.set = function(socket, data, callback) {
 			key: data.key,
 			value: data.value
 		});
-
-		logger.monitorConfig({io: index.server}, data);
 	});
 };
 

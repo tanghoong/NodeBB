@@ -7,15 +7,13 @@ var	SocketIO = require('socket.io'),
 	path = require('path'),
 	fs = require('fs'),
 	nconf = require('nconf'),
-	express = require('express'),
-	socketCookieParser = express.cookieParser(nconf.get('secret')),
+	socketCookieParser = require('cookie-parser')(nconf.get('secret')),
 	winston = require('winston'),
 
 	db = require('../database'),
 	user = require('../user'),
 	socketUser = require('./user'),
 	topics = require('../topics'),
-	logger = require('../logger'),
 	meta = require('../meta'),
 
 	Sockets = {},
@@ -66,9 +64,6 @@ Sockets.init = function(server) {
 				}
 
 				socket.uid = parseInt(uid, 10);
-
-				/* If meta.config.loggerIOStatus > 0, logger.io_one will hook into this socket */
-				logger.io_one(socket, uid);
 
 				if (uid) {
 

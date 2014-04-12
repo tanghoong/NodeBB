@@ -65,9 +65,6 @@ function miscRoutes(app, middleware, controllers) {
 
 	app.get('/admin/events', middleware.admin.buildHeader, controllers.admin.events.get);
 	app.get('/api/admin/events', controllers.admin.events.get);
-
-	app.get('/admin/logger', middleware.admin.buildHeader, controllers.admin.logger.get);
-	app.get('/api/admin/logger', controllers.admin.logger.get);
 }
 
 

@@ -14,7 +14,6 @@ var path = require('path'),
 	meta = require('./meta'),
 	user = require('./user'),
 	notifications = require('./notifications'),
-	logger = require('./logger'),
 	plugins = require('./plugins'),
 	middleware = require('./middleware'),
 	routes = require('./routes'),
@@ -36,7 +35,6 @@ if(nconf.get('ssl')) {
 
 	var	port = nconf.get('PORT') || nconf.get('port');
 
-	logger.init(app);
 	auth.registerApp(app);
 	emailer.registerApp(app);
 	notifications.init();
